@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -34,15 +35,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.border
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.ui.unit.sp
 import com.example.sortingvisualization.algorithms.CodeSnippets
 import com.example.sortingvisualization.algorithms.ProgrammingLanguage
 import com.example.sortingvisualization.algorithms.SortingAlgorithm
@@ -58,7 +69,7 @@ fun SortingVisualizer(
 ) {
     // Language selection state with preservation across orientation
     val selectedLanguageState = rememberSaveable { 
-        mutableStateOf(ProgrammingLanguage.KOTLIN)
+        mutableStateOf(ProgrammingLanguage.CPP)
     }
     
     // Algorithm expanded state
@@ -77,6 +88,7 @@ fun SortingVisualizer(
     // Complexity information for current algorithm
     val algorithmComplexity = remember(viewModel.selectedAlgorithm) {
         when (viewModel.selectedAlgorithm) {
+            // Basic comparison-based sorting
             SortingAlgorithm.BUBBLE_SORT ->
                 "Time: O(n²), Space: O(1)\nStable: Yes, In-place: Yes"
             SortingAlgorithm.SELECTION_SORT -> 
@@ -89,6 +101,22 @@ fun SortingVisualizer(
                 "Time: O(n log n), Space: O(log n)\nStable: No, In-place: Yes"
             SortingAlgorithm.HEAP_SORT -> 
                 "Time: O(n log n), Space: O(1)\nStable: No, In-place: Yes"
+            
+            // Advanced comparison-based sorting
+            SortingAlgorithm.SHELL_SORT ->
+                "Time: O(n log n), Space: O(1)\nStable: No, In-place: Yes"
+            SortingAlgorithm.COCKTAIL_SHAKER_SORT ->
+                "Time: O(n²), Space: O(1)\nStable: Yes, In-place: Yes"
+            SortingAlgorithm.COMB_SORT ->
+                "Time: O(n log n), Space: O(1)\nStable: No, In-place: Yes"
+            
+            // Non-comparison based sorting
+            SortingAlgorithm.COUNTING_SORT ->
+                "Time: O(n + k), Space: O(k)\nStable: Yes, In-place: No\nRequires known range"
+            SortingAlgorithm.RADIX_SORT ->
+                "Time: O(d(n + k)), Space: O(n + k)\nStable: Yes, In-place: No\nRequires fixed-width integers"
+            SortingAlgorithm.BUCKET_SORT ->
+                "Time: O(n + k), Space: O(n + k)\nStable: Yes, In-place: No\nRequires uniform distribution"
         }
     }
 
@@ -124,44 +152,50 @@ fun SortingVisualizer(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Algorithm Selection Dropdown
-                    Box(modifier = Modifier.weight(1f)) {
-                        ExposedDropdownMenuBox(
-                            expanded = algorithmExpanded,
-                            onExpandedChange = { 
-                                algorithmExpanded = !algorithmExpanded 
-                            }
-                        ) {
-                            TextField(
-                                value = viewModel.selectedAlgorithm.name,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Select Algorithm") },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(
-                                        expanded = algorithmExpanded
-                                    )
-                                },
-                                modifier = Modifier
-                                    .menuAnchor()
-                                    .fillMaxWidth()
-                            )
+                    // Algorithm Selection Dropdown with ScrollView
+                    ExposedDropdownMenuBox(
+                        expanded = algorithmExpanded,
+                        onExpandedChange = { 
+                            algorithmExpanded = !algorithmExpanded 
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Selected Algorithm TextField
+                        TextField(
+                            value = viewModel.selectedAlgorithm.displayName,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Select Sorting Algorithm") },
+                            trailingIcon = { 
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = algorithmExpanded
+                                ) 
+                            },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
 
-                            ExposedDropdownMenu(
-                                expanded = algorithmExpanded,
-                                onDismissRequest = { 
-                                    algorithmExpanded = false 
-                                }
-                            ) {
-                                SortingAlgorithm.values().forEach { algorithm ->
-                                    DropdownMenuItem(
-                                        text = { Text(algorithm.name) },
-                                        onClick = {
-                                            viewModel.selectedAlgorithm = algorithm
-                                            algorithmExpanded = false
-                                        }
-                                    )
-                                }
+                        // Dropdown Menu with Scrollable List
+                        DropdownMenu(
+                            expanded = algorithmExpanded,
+                            onDismissRequest = { 
+                                algorithmExpanded = false 
+                            },
+                            modifier = Modifier
+                                .heightIn(max = 250.dp)
+                        ) {
+                            // Scrollable list of algorithms
+                            SortingAlgorithm.values().forEach { algorithm ->
+                                DropdownMenuItem(
+                                    text = { Text(algorithm.displayName) },
+                                    onClick = {
+                                        // Update selected algorithm in ViewModel
+                                        viewModel.selectedAlgorithm = algorithm
+                                        algorithmExpanded = false
+                                    }
+                                )
                             }
                         }
                     }
@@ -180,9 +214,24 @@ fun SortingVisualizer(
                             Slider(
                                 modifier = Modifier.weight(1f),
                                 value = viewModel.sortingSpeed.toFloat(),
-                                onValueChange = { viewModel.sortingSpeed = it.toLong() },
-                                valueRange = 0.1f..2f,
-                                steps = 19
+                                onValueChange = { viewModel.updateSortingSpeed(it.toLong()) },
+                                valueRange = 1f..500f,
+                                steps = 49
+                            )
+                        }
+
+                        // Visualization Granularity Slider
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("Granularity")
+                            Slider(
+                                modifier = Modifier.weight(1f),
+                                value = viewModel.visualizationGranularity.toFloat(),
+                                onValueChange = { viewModel.updateVisualizationGranularity(it.toInt()) },
+                                valueRange = 1f..10f,
+                                steps = 8
                             )
                         }
 
@@ -218,38 +267,46 @@ fun SortingVisualizer(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Algorithm Selection Dropdown
+                    // Algorithm Selection Dropdown with ScrollView
                     ExposedDropdownMenuBox(
                         expanded = algorithmExpanded,
                         onExpandedChange = { 
                             algorithmExpanded = !algorithmExpanded 
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
+                        // Selected Algorithm TextField
                         TextField(
-                            value = viewModel.selectedAlgorithm.name,
+                            value = viewModel.selectedAlgorithm.displayName,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Select Algorithm") },
-                            trailingIcon = {
+                            label = { Text("Select Sorting Algorithm") },
+                            trailingIcon = { 
                                 ExposedDropdownMenuDefaults.TrailingIcon(
                                     expanded = algorithmExpanded
-                                )
+                                ) 
                             },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
                             modifier = Modifier
                                 .menuAnchor()
                                 .fillMaxWidth()
                         )
 
-                        ExposedDropdownMenu(
+                        // Dropdown Menu with Scrollable List
+                        DropdownMenu(
                             expanded = algorithmExpanded,
                             onDismissRequest = { 
                                 algorithmExpanded = false 
-                            }
+                            },
+                            modifier = Modifier
+                                .heightIn(max = 250.dp)
                         ) {
+                            // Scrollable list of algorithms
                             SortingAlgorithm.values().forEach { algorithm ->
                                 DropdownMenuItem(
-                                    text = { Text(algorithm.name) },
+                                    text = { Text(algorithm.displayName) },
                                     onClick = {
+                                        // Update selected algorithm in ViewModel
                                         viewModel.selectedAlgorithm = algorithm
                                         algorithmExpanded = false
                                     }
@@ -268,9 +325,25 @@ fun SortingVisualizer(
                         Slider(
                             modifier = Modifier.weight(1f),
                             value = viewModel.sortingSpeed.toFloat(),
-                            onValueChange = { viewModel.sortingSpeed = it.toLong() },
-                            valueRange = 0.1f..2f,
-                            steps = 19
+                            onValueChange = { viewModel.updateSortingSpeed(it.toLong()) },
+                            valueRange = 1f..500f,
+                            steps = 49
+                        )
+                    }
+
+                    // Visualization Granularity Slider
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("Granularity")
+                        Slider(
+                            modifier = Modifier.weight(1f),
+                            value = viewModel.visualizationGranularity.toFloat(),
+                            onValueChange = { viewModel.updateVisualizationGranularity(it.toInt()) },
+                            valueRange = 1f..10f,
+                            steps = 8
                         )
                     }
 
@@ -341,6 +414,54 @@ fun SortingVisualizer(
                     },
                     valueRange = 10f..100f,
                     steps = 9
+                )
+            }
+        }
+    }
+
+    // Sorting Steps Display Composable
+    @Composable
+    fun SortingStepsDisplay() {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 100.dp, max = 200.dp)
+                .padding(8.dp)
+                .verticalScroll(rememberScrollState()),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Current Step Information
+                Text(
+                    text = "Current Step: ${
+                        when {
+                            !viewModel.isSorting -> "Not Sorting"
+                            viewModel.currentCompareIndices.first != -1 -> 
+                                "Comparing indices ${viewModel.currentCompareIndices.first} and ${viewModel.currentCompareIndices.second}"
+                            else -> "Initializing Sort"
+                        }
+                    }",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Code Snippet Display
+                Text(
+                    text = CodeSnippets.getCodeSnippet(
+                        viewModel.selectedAlgorithm, 
+                        selectedLanguageState.value
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(8.dp)
                 )
             }
         }
@@ -463,65 +584,105 @@ fun SortingVisualizer(
                 // Language Selection Dropdown
                 ExposedDropdownMenuBox(
                     expanded = languageExpanded,
-                    onExpandedChange = { languageExpanded = !languageExpanded }
+                    onExpandedChange = { 
+                        languageExpanded = !languageExpanded 
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    // Selected Language TextField
                     TextField(
-                        value = selectedLanguageState.value.name,
+                        value = selectedLanguageState.value.displayName,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Select Language") },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = languageExpanded)
+                        label = { Text("Select Programming Language") },
+                        trailingIcon = { 
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = languageExpanded
+                            ) 
                         },
                         colors = ExposedDropdownMenuDefaults.textFieldColors(),
                         modifier = Modifier
                             .menuAnchor()
                             .fillMaxWidth()
                     )
-                    
-                    ExposedDropdownMenu(
+
+                    // Dropdown Menu with Scrollable List
+                    DropdownMenu(
                         expanded = languageExpanded,
-                        onDismissRequest = { languageExpanded = false }
+                        onDismissRequest = { 
+                            languageExpanded = false 
+                        },
+                        modifier = Modifier
+                            .heightIn(max = 250.dp)
                     ) {
+                        // List of programming languages
                         ProgrammingLanguage.values().forEach { language ->
                             DropdownMenuItem(
-                                text = { Text(language.name) },
+                                text = { Text(language.displayName) },
                                 onClick = {
+                                    // Update selected language
                                     selectedLanguageState.value = language
                                     languageExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                }
                             )
                         }
                     }
                 }
 
-                // Code Snippet
-                Box(
+                // Code Snippet with Copy Button
+                val context = LocalContext.current
+                val codeSnippet = CodeSnippets.getCodeSnippet(
+                    viewModel.selectedAlgorithm, 
+                    selectedLanguageState.value
+                )
+                
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 300.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(16.dp)
+                        .heightIn(min = 100.dp, max = 250.dp)
+                        .background(Color.LightGray.copy(alpha = 0.1f))
+                        .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                        .padding(4.dp)
                 ) {
-                    Text(
-                        CodeSnippets.getCodeSnippet(
-                            viewModel.selectedAlgorithm, 
-                            selectedLanguageState.value
-                        ),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontFamily = FontFamily.Monospace
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Scrollable Code Snippet
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .padding(4.dp)
+                    ) {
+                        Text(
+                            text = codeSnippet,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                            lineHeight = 12.sp
+                        )
+                    }
+
+                    // Copy Button
+                    Button(
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Sorting Algorithm Code", codeSnippet)
+                            clipboard.setPrimaryClip(clip)
+                            
+                            Toast.makeText(context, "Code copied to clipboard", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp)
+                    ) {
+                        Text("Copy Code", fontSize = 12.sp)
+                    }
                 }
             }
 
             // Sorting Controls
             SortingControls()
+
+            // Sorting Steps Display
+            SortingStepsDisplay()
         }
     }
 }

@@ -1,5 +1,9 @@
 package com.example.sortingvisualization.algorithms
 
-enum class ProgrammingLanguage {
-    KOTLIN, JAVA, PYTHON, CPP, JAVASCRIPT
+enum class ProgrammingLanguage(val displayName: String) {
+    CPP("C++"),
+    JAVA("Java"),
+    JAVASCRIPT("JavaScript"),
+    KOTLIN("Kotlin"),
+    PYTHON("Python")
 }

@@ -16,8 +16,9 @@ class SortingViewModel : ViewModel() {
     private companion object {
         const val MIN_ARRAY_SIZE = 10
         const val MAX_ARRAY_SIZE = 100
-        const val MIN_SPEED = 10L
-        const val MAX_SPEED = 2000L
+        const val MIN_SPEED = 1L
+        const val MAX_SPEED = 500L
+        const val DEFAULT_SPEED = 50L
     }
 
     // State properties
@@ -30,8 +31,13 @@ class SortingViewModel : ViewModel() {
     private val _isSorting = mutableStateOf(false)
     val isSorting: Boolean by _isSorting
 
-    private val _sortingSpeed = mutableStateOf(100L)
+    // Improved speed control with exponential scaling
+    private val _sortingSpeed = mutableStateOf(DEFAULT_SPEED)
     var sortingSpeed: Long by _sortingSpeed
+
+    // New property to control visualization granularity
+    private val _visualizationGranularity = mutableStateOf(1)
+    val visualizationGranularity: Int by _visualizationGranularity
 
     private val _currentCompareIndices = mutableStateOf(Pair(-1, -1))
     val currentCompareIndices: Pair<Int, Int> by _currentCompareIndices
@@ -60,27 +66,56 @@ class SortingViewModel : ViewModel() {
         generateRandomArray()
     }
 
-    // Update sorting speed with validation
+    // Update sorting speed with exponential scaling
     fun updateSortingSpeed(newSpeed: Long) {
+        // Exponential scaling: lower values mean faster sorting
         _sortingSpeed.value = newSpeed.coerceIn(MIN_SPEED, MAX_SPEED)
+    }
+
+    // New method to control visualization granularity
+    fun updateVisualizationGranularity(newGranularity: Int) {
+        _visualizationGranularity.value = newGranularity.coerceIn(1, 10)
     }
 
     // Start sorting the array with the selected algorithm
     fun startSorting() {
         if (_isSorting.value) return
+        
+        // Ensure we have an array to sort
+        if (_array.isEmpty()) {
+            generateRandomArray()
+        }
+
         _isSorting.value = true
         _currentCompareIndices.value = Pair(-1, -1)
 
         sortingJob = viewModelScope.launch {
-            when (selectedAlgorithm) {
-                SortingAlgorithm.BUBBLE_SORT -> bubbleSort()
-                SortingAlgorithm.SELECTION_SORT -> selectionSort()
-                SortingAlgorithm.INSERTION_SORT -> insertionSort()
-                SortingAlgorithm.MERGE_SORT -> mergeSortWrapper()
-                SortingAlgorithm.QUICK_SORT -> quickSortWrapper()
-                SortingAlgorithm.HEAP_SORT -> heapSort()
+            try {
+                when (selectedAlgorithm) {
+                    SortingAlgorithm.BUBBLE_SORT -> bubbleSort()
+                    SortingAlgorithm.SELECTION_SORT -> selectionSort()
+                    SortingAlgorithm.INSERTION_SORT -> insertionSort()
+                    SortingAlgorithm.MERGE_SORT -> mergeSortWrapper()
+                    SortingAlgorithm.QUICK_SORT -> quickSortWrapper()
+                    SortingAlgorithm.HEAP_SORT -> heapSort()
+                    
+                    // Advanced comparison-based sorting
+                    SortingAlgorithm.SHELL_SORT -> shellSort()
+                    SortingAlgorithm.COCKTAIL_SHAKER_SORT -> cocktailShakerSort()
+                    SortingAlgorithm.COMB_SORT -> combSort()
+                    
+                    // Non-comparison based sorting
+                    SortingAlgorithm.COUNTING_SORT -> countingSort()
+                    SortingAlgorithm.RADIX_SORT -> radixSortWrapper()
+                    SortingAlgorithm.BUCKET_SORT -> bucketSort()
+                }
+            } catch (e: Exception) {
+                // Log the error or handle it appropriately
+                e.printStackTrace()
+            } finally {
+                _isSorting.value = false
+                _currentCompareIndices.value = Pair(-1, -1)
             }
-            _isSorting.value = false
         }
     }
 
@@ -100,6 +135,14 @@ class SortingViewModel : ViewModel() {
         generateRandomArray()
     }
 
+    // Optimized delay mechanism
+    private suspend fun smartDelay() {
+        // Exponential delay with granularity control
+        val baseDelay = (MAX_SPEED - sortingSpeed + 1)
+        val granularityMultiplier = visualizationGranularity
+        delay(baseDelay * granularityMultiplier)
+    }
+
     // Sorting algorithm implementations
     private suspend fun bubbleSort() {
         val arr = _array
@@ -108,7 +151,7 @@ class SortingViewModel : ViewModel() {
             var swapped = false
             for (j in 0 until n - i - 1) {
                 _currentCompareIndices.value = Pair(j, j + 1)
-                delay(sortingSpeed)
+                smartDelay()
 
                 if (arr[j] > arr[j + 1]) {
                     arr[j] = arr[j + 1].also { arr[j + 1] = arr[j] }
@@ -126,7 +169,7 @@ class SortingViewModel : ViewModel() {
             var minIndex = i
             for (j in i + 1 until n) {
                 _currentCompareIndices.value = Pair(minIndex, j)
-                delay(sortingSpeed)
+                smartDelay()
 
                 if (arr[j] < arr[minIndex]) {
                     minIndex = j
@@ -146,7 +189,7 @@ class SortingViewModel : ViewModel() {
             var j = i - 1
             while (j >= 0 && arr[j] > key) {
                 _currentCompareIndices.value = Pair(j, j + 1)
-                delay(sortingSpeed)
+                smartDelay()
 
                 arr[j + 1] = arr[j]
                 j--
@@ -181,7 +224,7 @@ class SortingViewModel : ViewModel() {
 
         while (i < leftArr.size && j < rightArr.size) {
             _currentCompareIndices.value = Pair(left + i, mid + 1 + j)
-            delay(sortingSpeed)
+            smartDelay()
 
             if (leftArr[i] <= rightArr[j]) {
                 arr[k++] = leftArr[i++]
@@ -203,9 +246,9 @@ class SortingViewModel : ViewModel() {
 
     private suspend fun quickSort(arr: MutableList<Int>, low: Int, high: Int) {
         if (low < high) {
-            val pivotIndex = partition(arr, low, high)
-            quickSort(arr, low, pivotIndex - 1)
-            quickSort(arr, pivotIndex + 1, high)
+            val partitionIndex = partition(arr, low, high)
+            quickSort(arr, low, partitionIndex - 1)
+            quickSort(arr, partitionIndex + 1, high)
         }
     }
 
@@ -215,15 +258,22 @@ class SortingViewModel : ViewModel() {
 
         for (j in low until high) {
             _currentCompareIndices.value = Pair(j, high)
-            delay(sortingSpeed)
+            smartDelay()
 
             if (arr[j] < pivot) {
                 i++
-                arr[i] = arr[j].also { arr[j] = arr[i] }
+                // Swap elements
+                val temp = arr[i]
+                arr[i] = arr[j]
+                arr[j] = temp
             }
         }
 
-        arr[i + 1] = arr[high].also { arr[high] = arr[i + 1] }
+        // Place pivot in correct position
+        val temp = arr[i + 1]
+        arr[i + 1] = arr[high]
+        arr[high] = temp
+
         return i + 1
     }
 
@@ -231,9 +281,19 @@ class SortingViewModel : ViewModel() {
         val arr = _array
         val n = arr.size
 
-        for (i in n / 2 - 1 downTo 0) heapify(arr, n, i)
+        // Build max heap
+        for (i in n / 2 - 1 downTo 0) {
+            heapify(arr, n, i)
+        }
+
+        // Extract elements from heap one by one
         for (i in n - 1 downTo 1) {
-            arr[0] = arr[i].also { arr[i] = arr[0] }
+            // Move current root to end
+            val temp = arr[0]
+            arr[0] = arr[i]
+            arr[i] = temp
+
+            // Call max heapify on the reduced heap
             heapify(arr, i, 0)
         }
     }
@@ -243,12 +303,248 @@ class SortingViewModel : ViewModel() {
         val left = 2 * i + 1
         val right = 2 * i + 2
 
-        if (left < n && arr[left] > arr[largest]) largest = left
-        if (right < n && arr[right] > arr[largest]) largest = right
+        _currentCompareIndices.value = Pair(largest, left)
+        smartDelay()
+
+        if (left < n && arr[left] > arr[largest]) {
+            largest = left
+        }
+
+        _currentCompareIndices.value = Pair(largest, right)
+        smartDelay()
+
+        if (right < n && arr[right] > arr[largest]) {
+            largest = right
+        }
 
         if (largest != i) {
-            arr[i] = arr[largest].also { arr[largest] = arr[i] }
+            // Swap elements
+            val swap = arr[i]
+            arr[i] = arr[largest]
+            arr[largest] = swap
+
+            // Recursively heapify the affected sub-tree
             heapify(arr, n, largest)
+        }
+    }
+
+    // Advanced comparison-based sorting algorithms
+    private suspend fun shellSort() {
+        val arr = _array
+        val n = arr.size
+        var gap = n / 2
+        
+        while (gap > 0) {
+            for (i in gap until n) {
+                val temp = arr[i]
+                var j = i
+                
+                while (j >= gap && arr[j - gap] > temp) {
+                    _currentCompareIndices.value = Pair(j - gap, j)
+                    smartDelay()
+                    
+                    arr[j] = arr[j - gap]
+                    j -= gap
+                }
+                
+                arr[j] = temp
+            }
+            gap /= 2
+        }
+    }
+
+    private suspend fun cocktailShakerSort() {
+        val arr = _array
+        var swapped: Boolean
+        var start = 0
+        var end = arr.size
+        
+        do {
+            swapped = false
+            
+            // Forward pass (like bubble sort)
+            for (i in start until end - 1) {
+                _currentCompareIndices.value = Pair(i, i + 1)
+                smartDelay()
+                
+                if (arr[i] > arr[i + 1]) {
+                    val temp = arr[i]
+                    arr[i] = arr[i + 1]
+                    arr[i + 1] = temp
+                    swapped = true
+                }
+            }
+            
+            if (!swapped) break
+            
+            swapped = false
+            end--
+            
+            // Backward pass
+            for (i in end - 1 downTo start + 1) {
+                _currentCompareIndices.value = Pair(i - 1, i)
+                smartDelay()
+                
+                if (arr[i] < arr[i - 1]) {
+                    val temp = arr[i]
+                    arr[i] = arr[i - 1]
+                    arr[i - 1] = temp
+                    swapped = true
+                }
+            }
+            
+            start++
+        } while (swapped)
+    }
+
+    private suspend fun combSort() {
+        val arr = _array
+        val shrinkFactor = 1.3
+        var gap = arr.size
+        var swapped = true
+        
+        while (gap > 1 || swapped) {
+            // Update gap
+            gap = maxOf(1, (gap / shrinkFactor).toInt())
+            
+            swapped = false
+            
+            for (i in 0 until arr.size - gap) {
+                _currentCompareIndices.value = Pair(i, i + gap)
+                smartDelay()
+                
+                if (arr[i] > arr[i + gap]) {
+                    // Swap elements
+                    val temp = arr[i]
+                    arr[i] = arr[i + gap]
+                    arr[i + gap] = temp
+                    swapped = true
+                }
+            }
+        }
+    }
+
+    // Non-comparison based sorting algorithms
+    private suspend fun countingSort() {
+        val arr = _array
+        if (arr.isEmpty()) return
+        
+        // Find range of input
+        val max = arr.maxOrNull()!!
+        val min = arr.minOrNull()!!
+        val range = max - min + 1
+        
+        // Create counting array
+        val count = MutableList(range) { 0 }
+        
+        // Count occurrences of each unique object
+        for (num in arr) {
+            count[num - min]++
+        }
+        
+        // Modify count array to store actual position of each object
+        for (i in 1 until count.size) {
+            count[i] += count[i - 1]
+        }
+        
+        // Build output array
+        val output = MutableList(arr.size) { 0 }
+        for (i in arr.size - 1 downTo 0) {
+            _currentCompareIndices.value = Pair(i, count[arr[i] - min] - 1)
+            smartDelay()
+            
+            output[count[arr[i] - min] - 1] = arr[i]
+            count[arr[i] - min]--
+        }
+        
+        // Copy output to arr
+        for (i in arr.indices) {
+            arr[i] = output[i]
+        }
+    }
+
+    private suspend fun radixSortWrapper() {
+        val arr = _array
+        if (arr.isEmpty()) return
+        
+        // Find the maximum number to know number of digits
+        val max = arr.maxOrNull()!!
+        
+        // Do counting sort for every digit
+        var exp = 1
+        while (max / exp > 0) {
+            countingSortByDigit(arr, exp)
+            exp *= 10
+        }
+    }
+
+    private suspend fun countingSortByDigit(arr: MutableList<Int>, exp: Int) {
+        val n = arr.size
+        val output = MutableList(n) { 0 }
+        val count = MutableList(10) { 0 }
+        
+        // Store count of occurrences in count[]
+        for (i in 0 until n) {
+            val index = (arr[i] / exp) % 10
+            count[index]++
+        }
+        
+        // Change count[i] so that count[i] now contains actual
+        // position of this digit in output[]
+        for (i in 1 until 10) {
+            count[i] += count[i - 1]
+        }
+        
+        // Build the output array
+        for (i in n - 1 downTo 0) {
+            val index = (arr[i] / exp) % 10
+            _currentCompareIndices.value = Pair(i, count[index] - 1)
+            smartDelay()
+            
+            output[count[index] - 1] = arr[i]
+            count[index]--
+        }
+        
+        // Copy the output array to arr[]
+        for (i in 0 until n) {
+            arr[i] = output[i]
+        }
+    }
+
+    private suspend fun bucketSort() {
+        val arr = _array
+        if (arr.isEmpty()) return
+        
+        // Find range of input
+        val max = arr.maxOrNull()!!
+        val min = arr.minOrNull()!!
+        
+        // Number of buckets
+        val bucketCount = 10
+        
+        // Create empty buckets
+        val buckets = List(bucketCount) { mutableListOf<Int>() }
+        
+        // Distribute input array elements into buckets
+        for (num in arr) {
+            val bucketIndex = ((num - min) * (bucketCount - 1) / (max - min)).toInt()
+            buckets[bucketIndex].add(num)
+        }
+        
+        // Sort individual buckets
+        for (bucket in buckets) {
+            bucket.sort()
+        }
+        
+        // Concatenate all buckets into arr
+        var index = 0
+        for (bucket in buckets) {
+            for (num in bucket) {
+                _currentCompareIndices.value = Pair(index, index)
+                smartDelay()
+                
+                arr[index++] = num
+            }
         }
     }
 
