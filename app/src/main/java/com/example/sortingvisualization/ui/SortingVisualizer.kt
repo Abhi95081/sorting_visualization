@@ -78,6 +78,14 @@ fun SortingVisualizer(
     viewModel: SortingViewModel,
     isLandscape: Boolean = false
 ) {
+    // Use isLandscape to conditionally adjust layout or UI elements
+    val screenLayout = if (isLandscape) {
+        Modifier.fillMaxSize()
+            .then(Modifier.padding(horizontal = 16.dp))
+    } else {
+        Modifier.fillMaxSize()
+    }
+
     // Language selection state with preservation across orientation
     val selectedLanguageState = rememberSaveable { 
         mutableStateOf(ProgrammingLanguage.CPP)
@@ -128,6 +136,18 @@ fun SortingVisualizer(
                 "Time: O(d(n + k)), Space: O(n + k)\nStable: Yes, In-place: No\nRequires fixed-width integers"
             SortingAlgorithm.BUCKET_SORT ->
                 "Time: O(n + k), Space: O(n + k)\nStable: Yes, In-place: No\nRequires uniform distribution"
+            
+            // Additional sorting algorithms
+            SortingAlgorithm.PIGEONHOLE_SORT ->
+                "Time: O(n + k), Space: O(k)\nStable: Yes, In-place: No\nRequires known range"
+            SortingAlgorithm.TIM_SORT ->
+                "Time: O(n log n), Space: O(n)\nStable: Yes, In-place: No\nHybrid of Insertion and Merge Sort"
+            SortingAlgorithm.GNOME_SORT ->
+                "Time: O(n²), Space: O(1)\nStable: Yes, In-place: Yes"
+            SortingAlgorithm.CYCLE_SORT ->
+                "Time: O(n²), Space: O(1)\nStable: No, In-place: Yes\nMinimizes writes"
+            SortingAlgorithm.PANCAKE_SORT ->
+                "Time: O(n), Space: O(1)\nStable: No, In-place: Yes\nUnique sorting technique"
         }
     }
 
@@ -330,8 +350,7 @@ fun SortingVisualizer(
 
     // Main UI Layout
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = screenLayout
             .systemBarsPadding()  // Ensure content doesn't overlap system bars
     ) {
         // Scrollable content with bottom padding to prevent overlap with bottom bar
@@ -502,7 +521,114 @@ fun SortingVisualizer(
                 }
             }
 
-            // 4. Programming Language Selection
+            // 4. Sorting Algorithm Selection
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
+                ) {
+                    Text(
+                        text = "Sorting Algorithm",
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+
+                    // Dropdown for sorting algorithm selection
+                    ExposedDropdownMenuBox(
+                        expanded = algorithmExpanded,
+                        onExpandedChange = { algorithmExpanded = !algorithmExpanded },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        // Selected algorithm display
+                        TextField(
+                            value = viewModel.selectedAlgorithm.displayName,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Sorting Algorithm") },
+                            trailingIcon = { 
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = algorithmExpanded
+                                ) 
+                            },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        
+                        // Dropdown menu with algorithm options
+                        ExposedDropdownMenu(
+                            expanded = algorithmExpanded,
+                            onDismissRequest = { algorithmExpanded = false }
+                        ) {
+                            // Group sorting algorithms by type for better organization
+                            val algorithmGroups = mapOf(
+                                "Comparison-based Sorting" to listOf(
+                                    SortingAlgorithm.BUBBLE_SORT,
+                                    SortingAlgorithm.SELECTION_SORT,
+                                    SortingAlgorithm.INSERTION_SORT,
+                                    SortingAlgorithm.MERGE_SORT,
+                                    SortingAlgorithm.QUICK_SORT,
+                                    SortingAlgorithm.HEAP_SORT
+                                ),
+                                "Advanced Comparison Sorting" to listOf(
+                                    SortingAlgorithm.SHELL_SORT,
+                                    SortingAlgorithm.COCKTAIL_SHAKER_SORT,
+                                    SortingAlgorithm.COMB_SORT
+                                ),
+                                "Non-Comparison Sorting" to listOf(
+                                    SortingAlgorithm.COUNTING_SORT,
+                                    SortingAlgorithm.RADIX_SORT,
+                                    SortingAlgorithm.BUCKET_SORT
+                                )
+                            )
+
+                            algorithmGroups.forEach { (groupName, algorithms) ->
+                                // Group header
+                                Text(
+                                    text = groupName,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .padding(8.dp)
+                                )
+
+                                // Algorithms in the group
+                                algorithms.forEach { algorithm ->
+                                    DropdownMenuItem(
+                                        text = { 
+                                            Column {
+                                                Text(
+                                                    text = algorithm.displayName, 
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            // Update selected algorithm
+                                            viewModel.selectedAlgorithm = algorithm
+                                            algorithmExpanded = false
+
+                                            // Reset array when algorithm changes
+                                            viewModel.resetArray()
+                                        },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 5. Programming Language Selection
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(2.dp)
@@ -521,9 +647,10 @@ fun SortingVisualizer(
                     // Language Selection Dropdown
                     ExposedDropdownMenuBox(
                         expanded = languageExpanded,
-                        onExpandedChange = { 
-                            languageExpanded = !languageExpanded 
-                        }
+                        onExpandedChange = { languageExpanded = !languageExpanded },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
                     ) {
                         TextField(
                             value = selectedLanguageState.value.name,
@@ -543,9 +670,7 @@ fun SortingVisualizer(
 
                         DropdownMenu(
                             expanded = languageExpanded,
-                            onDismissRequest = { 
-                                languageExpanded = false 
-                            }
+                            onDismissRequest = { languageExpanded = false }
                         ) {
                             ProgrammingLanguage.values().forEach { language ->
                                 DropdownMenuItem(
@@ -565,7 +690,7 @@ fun SortingVisualizer(
                 }
             }
 
-            // 5. Algorithm Complexity
+            // 6. Algorithm Complexity
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(2.dp)
@@ -588,7 +713,7 @@ fun SortingVisualizer(
                 }
             }
 
-            // 6. Sorting Steps and Controls
+            // 7. Sorting Steps and Controls
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(2.dp)

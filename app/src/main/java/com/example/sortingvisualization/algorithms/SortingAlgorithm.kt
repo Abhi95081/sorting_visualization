@@ -17,5 +17,12 @@ enum class SortingAlgorithm(val displayName: String) {
     // Non-comparison based sorting
     COUNTING_SORT("Counting Sort"),
     RADIX_SORT("Radix Sort"),
-    BUCKET_SORT("Bucket Sort")
+    BUCKET_SORT("Bucket Sort"),
+
+    // Additional sorting algorithms
+    PIGEONHOLE_SORT("Pigeonhole Sort"),
+    TIM_SORT("Tim Sort"),
+    GNOME_SORT("Gnome Sort"),
+    CYCLE_SORT("Cycle Sort"),
+    PANCAKE_SORT("Pancake Sort")
 }
