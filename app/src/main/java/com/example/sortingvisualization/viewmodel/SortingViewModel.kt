@@ -52,6 +52,10 @@ class SortingViewModel : ViewModel() {
     private val _showArraySizeDialog = mutableStateOf(false)
     val showArraySizeDialog: State<Boolean> = _showArraySizeDialog
 
+    // Sorting steps tracking
+    private val _sortingSteps = mutableStateListOf<String>()
+    val sortingSteps: List<String> = _sortingSteps
+
     // Generate a random array with the specified size
     private fun createRandomArray(size: Int): List<Double> {
         return List(size) { (1..size).random().toDouble() }
@@ -100,6 +104,20 @@ class SortingViewModel : ViewModel() {
     // New method to control visualization granularity
     fun updateVisualizationGranularity(newGranularity: Int) {
         _visualizationGranularity.value = newGranularity.coerceIn(1, 10)
+    }
+
+    // Clear sorting steps before starting a new sort
+    private fun clearSortingSteps() {
+        _sortingSteps.clear()
+    }
+
+    // Add a sorting step
+    private fun addSortingStep(step: String) {
+        _sortingSteps.add(step)
+        // Limit the number of steps to prevent excessive memory usage
+        if (_sortingSteps.size > 20) {
+            _sortingSteps.removeAt(0)
+        }
     }
 
     // Start sorting the array with the selected algorithm
@@ -172,6 +190,9 @@ class SortingViewModel : ViewModel() {
     private suspend fun bubbleSort() {
         val arr = _array
         val n = arr.size
+        clearSortingSteps()
+        addSortingStep("Starting Bubble Sort")
+
         for (i in 0 until n - 1) {
             var swapped = false
             for (j in 0 until n - i - 1) {
@@ -179,17 +200,28 @@ class SortingViewModel : ViewModel() {
                 smartDelay()
 
                 if (arr[j] > arr[j + 1]) {
+                    // Add step for swap
+                    addSortingStep("Swapping ${arr[j]} and ${arr[j + 1]} at indices $j and ${j+1}")
+                    
                     arr[j] = arr[j + 1].also { arr[j + 1] = arr[j] }
                     swapped = true
                 }
             }
-            if (!swapped) break
+            if (!swapped) {
+                addSortingStep("Array is sorted. Stopping early.")
+                break
+            }
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun selectionSort() {
         val arr = _array
         val n = arr.size
+        clearSortingSteps()
+        addSortingStep("Starting Selection Sort")
+
         for (i in 0 until n - 1) {
             var minIndex = i
             for (j in i + 1 until n) {
@@ -200,15 +232,22 @@ class SortingViewModel : ViewModel() {
                     minIndex = j
                 }
             }
+            
             if (minIndex != i) {
+                addSortingStep("Moving minimum ${arr[minIndex]} to index $i")
                 arr[i] = arr[minIndex].also { arr[minIndex] = arr[i] }
             }
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun insertionSort() {
         val arr = _array
         val n = arr.size
+        clearSortingSteps()
+        addSortingStep("Starting Insertion Sort")
+
         for (i in 1 until n) {
             val key = arr[i]
             var j = i - 1
@@ -219,15 +258,22 @@ class SortingViewModel : ViewModel() {
                 arr[j + 1] = arr[j]
                 j--
             }
+            addSortingStep("Inserting ${key} at index ${j+1}")
             arr[j + 1] = key
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun mergeSortWrapper() {
         val arr = _array.toMutableList()
+        clearSortingSteps()
+        addSortingStep("Starting Merge Sort")
         mergeSort(arr, 0, arr.size - 1)
         _array.clear()
         _array.addAll(arr)
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun mergeSort(arr: MutableList<Double>, left: Int, right: Int) {
@@ -264,9 +310,13 @@ class SortingViewModel : ViewModel() {
 
     private suspend fun quickSortWrapper() {
         val arr = _array.toMutableList()
+        clearSortingSteps()
+        addSortingStep("Starting Quick Sort")
         quickSort(arr, 0, arr.size - 1)
         _array.clear()
         _array.addAll(arr)
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun quickSort(arr: MutableList<Double>, low: Int, high: Int) {
@@ -291,6 +341,7 @@ class SortingViewModel : ViewModel() {
                 val temp = arr[i]
                 arr[i] = arr[j]
                 arr[j] = temp
+                addSortingStep("Swapping ${arr[i]} and ${arr[j]} at indices $i and $j")
             }
         }
 
@@ -298,6 +349,7 @@ class SortingViewModel : ViewModel() {
         val temp = arr[i + 1]
         arr[i + 1] = arr[high]
         arr[high] = temp
+        addSortingStep("Placing pivot ${arr[i+1]} at index ${i+1}")
 
         return i + 1
     }
@@ -305,6 +357,8 @@ class SortingViewModel : ViewModel() {
     private suspend fun heapSort() {
         val arr = _array
         val n = arr.size
+        clearSortingSteps()
+        addSortingStep("Starting Heap Sort")
 
         // Build max heap
         for (i in n / 2 - 1 downTo 0) {
@@ -317,10 +371,13 @@ class SortingViewModel : ViewModel() {
             val temp = arr[0]
             arr[0] = arr[i]
             arr[i] = temp
+            addSortingStep("Swapping ${arr[0]} and ${arr[i]} at indices 0 and $i")
 
             // Call max heapify on the reduced heap
             heapify(arr, i, 0)
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun heapify(arr: MutableList<Double>, n: Int, i: Int) {
@@ -347,6 +404,7 @@ class SortingViewModel : ViewModel() {
             val swap = arr[i]
             arr[i] = arr[largest]
             arr[largest] = swap
+            addSortingStep("Swapping ${arr[i]} and ${arr[largest]} at indices $i and $largest")
 
             // Recursively heapify the affected sub-tree
             heapify(arr, n, largest)
@@ -357,6 +415,9 @@ class SortingViewModel : ViewModel() {
     private suspend fun shellSort() {
         val arr = _array
         val n = arr.size
+        clearSortingSteps()
+        addSortingStep("Starting Shell Sort")
+
         var gap = n / 2
         
         while (gap > 0) {
@@ -372,10 +433,13 @@ class SortingViewModel : ViewModel() {
                     j -= gap
                 }
                 
+                addSortingStep("Inserting ${temp} at index $j")
                 arr[j] = temp
             }
             gap /= 2
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun cocktailShakerSort() {
@@ -383,7 +447,9 @@ class SortingViewModel : ViewModel() {
         var swapped: Boolean
         var start = 0
         var end = arr.size
-        
+        clearSortingSteps()
+        addSortingStep("Starting Cocktail Shaker Sort")
+
         do {
             swapped = false
             
@@ -396,6 +462,7 @@ class SortingViewModel : ViewModel() {
                     val temp = arr[i]
                     arr[i] = arr[i + 1]
                     arr[i + 1] = temp
+                    addSortingStep("Swapping ${arr[i]} and ${arr[i + 1]} at indices $i and ${i+1}")
                     swapped = true
                 }
             }
@@ -414,12 +481,15 @@ class SortingViewModel : ViewModel() {
                     val temp = arr[i]
                     arr[i] = arr[i - 1]
                     arr[i - 1] = temp
+                    addSortingStep("Swapping ${arr[i]} and ${arr[i - 1]} at indices $i and ${i-1}")
                     swapped = true
                 }
             }
             
             start++
         } while (swapped)
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun combSort() {
@@ -427,7 +497,9 @@ class SortingViewModel : ViewModel() {
         val shrinkFactor = 1.3
         var gap = arr.size
         var swapped = true
-        
+        clearSortingSteps()
+        addSortingStep("Starting Comb Sort")
+
         while (gap > 1 || swapped) {
             // Update gap
             gap = maxOf(1, (gap / shrinkFactor).toInt())
@@ -443,10 +515,13 @@ class SortingViewModel : ViewModel() {
                     val temp = arr[i]
                     arr[i] = arr[i + gap]
                     arr[i + gap] = temp
+                    addSortingStep("Swapping ${arr[i]} and ${arr[i + gap]} at indices $i and ${i+gap}")
                     swapped = true
                 }
             }
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     // Non-comparison based sorting algorithms
@@ -486,6 +561,8 @@ class SortingViewModel : ViewModel() {
         for (i in arr.indices) {
             arr[i] = output[i]
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun radixSortWrapper() {
@@ -497,10 +574,15 @@ class SortingViewModel : ViewModel() {
         
         // Do counting sort for every digit
         var exp = 1
+        clearSortingSteps()
+        addSortingStep("Starting Radix Sort")
+
         while (max * exp > 0) {
             countingSortByDigit(arr, exp)
             exp *= 10
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     private suspend fun countingSortByDigit(arr: MutableList<Double>, exp: Int) {
@@ -571,6 +653,8 @@ class SortingViewModel : ViewModel() {
                 arr[index++] = num
             }
         }
+        addSortingStep("Sorting Complete")
+        _currentCompareIndices.value = Pair(-1, -1)
     }
 
     // Update array manually based on input string

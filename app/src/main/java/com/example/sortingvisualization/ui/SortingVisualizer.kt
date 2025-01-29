@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -214,46 +216,54 @@ fun SortingVisualizer(
     @Composable
     fun SortingStepsDisplay() {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 100.dp, max = 200.dp)
-                .padding(8.dp)
-                .verticalScroll(rememberScrollState()),
-            elevation = CardDefaults.cardElevation(4.dp)
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
             ) {
-                // Current Step Information
                 Text(
-                    text = "Current Step: ${
-                        when {
-                            !viewModel.isSorting -> "Not Sorting"
-                            viewModel.currentCompareIndices.first != -1 -> 
-                                "Comparing indices ${viewModel.currentCompareIndices.first} and ${viewModel.currentCompareIndices.second}"
-                            else -> "Initializing Sort"
-                        }
-                    }",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    text = "Sorting Steps",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
 
-                // Code Snippet Display
+                // Indices Display
                 Text(
-                    text = CodeSnippets.getCodeSnippet(
-                        viewModel.selectedAlgorithm, 
-                        selectedLanguageState.value
+                    text = "Indices: ${
+                        if (viewModel.currentCompareIndices.first != -1) 
+                            "${viewModel.currentCompareIndices.first},${viewModel.currentCompareIndices.second}" 
+                        else 
+                            "-"
+                    }",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 10.sp
                     ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(8.dp)
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
+
+                // Sorting Steps List
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 50.dp, max = 150.dp),
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    items(viewModel.sortingSteps) { step ->
+                        Text(
+                            text = step,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 9.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
         }
     }
@@ -589,61 +599,44 @@ fun SortingVisualizer(
                         .padding(4.dp)
                 ) {
                     Text(
-                        text = "Sorting Controls",
+                        text = "Sorting Steps",
                         style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
 
-                    // Algorithm Selection
-                    ExposedDropdownMenuBox(
-                        expanded = algorithmExpanded,
-                        onExpandedChange = { 
-                            algorithmExpanded = !algorithmExpanded 
-                        }
-                    ) {
-                        TextField(
-                            value = viewModel.selectedAlgorithm.displayName,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Select Sorting Algorithm") },
-                            trailingIcon = { 
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = algorithmExpanded
-                                ) 
-                            },
-                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                        )
+                    // Indices Display
+                    Text(
+                        text = "Indices: ${
+                            if (viewModel.currentCompareIndices.first != -1) 
+                                "${viewModel.currentCompareIndices.first},${viewModel.currentCompareIndices.second}" 
+                            else 
+                                "-"
+                        }",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 10.sp
+                        ),
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
 
-                        DropdownMenu(
-                            expanded = algorithmExpanded,
-                            onDismissRequest = { 
-                                algorithmExpanded = false 
-                            }
-                        ) {
-                            SortingAlgorithm.values().forEach { algorithm ->
-                                DropdownMenuItem(
-                                    text = { Text(algorithm.displayName) },
-                                    onClick = {
-                                        viewModel.selectedAlgorithm = algorithm
-                                        algorithmExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    // Sorting Steps Display with Scrollable Content
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
+                    // Sorting Steps List
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(min = 100.dp, max = 200.dp)
-                            .verticalScroll(rememberScrollState())
+                            .heightIn(min = 50.dp, max = 150.dp),
+                        verticalArrangement = Arrangement.Bottom
                     ) {
-                        SortingStepsDisplay()
+                        items(viewModel.sortingSteps) { step ->
+                            Text(
+                                text = step,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 9.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }
