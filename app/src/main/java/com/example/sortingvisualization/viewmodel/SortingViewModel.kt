@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sortingvisualization.algorithms.SortingAlgorithm
@@ -25,8 +26,8 @@ class SortingViewModel : ViewModel() {
     private val _arraySize = mutableStateOf(50)
     val arraySize: Int by _arraySize
 
-    private val _array = mutableStateListOf<Int>()
-    val array: List<Int> = _array
+    private val _array = mutableStateListOf<Double>()
+    val array: List<Double> = _array
 
     private val _isSorting = mutableStateOf(false)
     val isSorting: Boolean by _isSorting
@@ -47,9 +48,13 @@ class SortingViewModel : ViewModel() {
     private val _selectedAlgorithm = mutableStateOf(SortingAlgorithm.BUBBLE_SORT)
     var selectedAlgorithm: SortingAlgorithm by _selectedAlgorithm
 
+    // Array Size Dialog State
+    private val _showArraySizeDialog = mutableStateOf(false)
+    val showArraySizeDialog: State<Boolean> = _showArraySizeDialog
+
     // Generate a random array with the specified size
-    private fun createRandomArray(size: Int): List<Int> {
-        return List(size) { (1..size).random() }
+    private fun createRandomArray(size: Int): List<Double> {
+        return List(size) { (1..size).random().toDouble() }
     }
 
     // Generate a new random array
@@ -59,11 +64,31 @@ class SortingViewModel : ViewModel() {
         _array.addAll(createRandomArray(_arraySize.value))
     }
 
+    // Method to show array size dialog
+    fun showArraySizeDialog() {
+        _showArraySizeDialog.value = true
+    }
+
+    // Method to dismiss array size dialog
+    fun dismissArraySizeDialog() {
+        _showArraySizeDialog.value = false
+    }
+
     // Update array size with validation
     fun updateArraySize(newSize: Int) {
         cancelSorting()
-        _arraySize.value = newSize.coerceIn(MIN_ARRAY_SIZE, MAX_ARRAY_SIZE)
+        
+        // Ensure the size is within reasonable bounds
+        val constrainedSize = newSize.coerceIn(10, 100)
+        
+        // Update array size
+        _arraySize.value = constrainedSize
+        
+        // Regenerate array with new size
         generateRandomArray()
+        
+        // Dismiss dialog
+        dismissArraySizeDialog()
     }
 
     // Update sorting speed with exponential scaling
@@ -205,7 +230,7 @@ class SortingViewModel : ViewModel() {
         _array.addAll(arr)
     }
 
-    private suspend fun mergeSort(arr: MutableList<Int>, left: Int, right: Int) {
+    private suspend fun mergeSort(arr: MutableList<Double>, left: Int, right: Int) {
         if (left < right) {
             val mid = (left + right) / 2
             mergeSort(arr, left, mid)
@@ -214,7 +239,7 @@ class SortingViewModel : ViewModel() {
         }
     }
 
-    private suspend fun merge(arr: MutableList<Int>, left: Int, mid: Int, right: Int) {
+    private suspend fun merge(arr: MutableList<Double>, left: Int, mid: Int, right: Int) {
         val leftArr = arr.subList(left, mid + 1).toMutableList()
         val rightArr = arr.subList(mid + 1, right + 1).toMutableList()
 
@@ -244,7 +269,7 @@ class SortingViewModel : ViewModel() {
         _array.addAll(arr)
     }
 
-    private suspend fun quickSort(arr: MutableList<Int>, low: Int, high: Int) {
+    private suspend fun quickSort(arr: MutableList<Double>, low: Int, high: Int) {
         if (low < high) {
             val partitionIndex = partition(arr, low, high)
             quickSort(arr, low, partitionIndex - 1)
@@ -252,7 +277,7 @@ class SortingViewModel : ViewModel() {
         }
     }
 
-    private suspend fun partition(arr: MutableList<Int>, low: Int, high: Int): Int {
+    private suspend fun partition(arr: MutableList<Double>, low: Int, high: Int): Int {
         val pivot = arr[high]
         var i = low - 1
 
@@ -298,7 +323,7 @@ class SortingViewModel : ViewModel() {
         }
     }
 
-    private suspend fun heapify(arr: MutableList<Int>, n: Int, i: Int) {
+    private suspend fun heapify(arr: MutableList<Double>, n: Int, i: Int) {
         var largest = i
         val left = 2 * i + 1
         val right = 2 * i + 2
@@ -435,11 +460,11 @@ class SortingViewModel : ViewModel() {
         val range = max - min + 1
         
         // Create counting array
-        val count = MutableList(range) { 0 }
+        val count = MutableList(range.toInt()) { 0 }
         
         // Count occurrences of each unique object
         for (num in arr) {
-            count[num - min]++
+            count[(num - min).toInt()]++
         }
         
         // Modify count array to store actual position of each object
@@ -448,13 +473,13 @@ class SortingViewModel : ViewModel() {
         }
         
         // Build output array
-        val output = MutableList(arr.size) { 0 }
+        val output = MutableList(arr.size) { 0.0 }
         for (i in arr.size - 1 downTo 0) {
-            _currentCompareIndices.value = Pair(i, count[arr[i] - min] - 1)
+            _currentCompareIndices.value = Pair(i, count[(arr[i] - min).toInt()] - 1)
             smartDelay()
             
-            output[count[arr[i] - min] - 1] = arr[i]
-            count[arr[i] - min]--
+            output[count[(arr[i] - min).toInt()] - 1] = arr[i]
+            count[(arr[i] - min).toInt()]--
         }
         
         // Copy output to arr
@@ -472,20 +497,20 @@ class SortingViewModel : ViewModel() {
         
         // Do counting sort for every digit
         var exp = 1
-        while (max / exp > 0) {
+        while (max * exp > 0) {
             countingSortByDigit(arr, exp)
             exp *= 10
         }
     }
 
-    private suspend fun countingSortByDigit(arr: MutableList<Int>, exp: Int) {
+    private suspend fun countingSortByDigit(arr: MutableList<Double>, exp: Int) {
         val n = arr.size
-        val output = MutableList(n) { 0 }
+        val output = MutableList(n) { 0.0 }
         val count = MutableList(10) { 0 }
         
         // Store count of occurrences in count[]
         for (i in 0 until n) {
-            val index = (arr[i] / exp) % 10
+            val index = ((arr[i] * exp).toInt() % 10)
             count[index]++
         }
         
@@ -497,7 +522,7 @@ class SortingViewModel : ViewModel() {
         
         // Build the output array
         for (i in n - 1 downTo 0) {
-            val index = (arr[i] / exp) % 10
+            val index = ((arr[i] * exp).toInt() % 10)
             _currentCompareIndices.value = Pair(i, count[index] - 1)
             smartDelay()
             
@@ -523,7 +548,7 @@ class SortingViewModel : ViewModel() {
         val bucketCount = 10
         
         // Create empty buckets
-        val buckets = List(bucketCount) { mutableListOf<Int>() }
+        val buckets = List(bucketCount) { mutableListOf<Double>() }
         
         // Distribute input array elements into buckets
         for (num in arr) {
@@ -549,17 +574,26 @@ class SortingViewModel : ViewModel() {
     }
 
     // Update array manually based on input string
-    fun updateArrayManually(input: String) {
+    fun parseInputArray(input: String) {
         try {
             val parsedArray = input.split(Regex("[,\\s]+"))
                 .filter { it.isNotBlank() }
-                .map { it.toInt() }
+                .map { 
+                    it.trim().toDoubleOrNull() ?: throw NumberFormatException("Invalid number: $it") 
+                }
                 .toList()
+
+            if (parsedArray.isEmpty()) {
+                throw IllegalArgumentException("Input array cannot be empty")
+            }
 
             _array.clear()
             _array.addAll(parsedArray)
-        } catch (e: Exception) {
-            // Handle invalid input gracefully
+        } catch (e: NumberFormatException) {
+            // Handle invalid input, perhaps show an error to the user
+            println("Error parsing input: ${e.message}")
+        } catch (e: IllegalArgumentException) {
+            println("Invalid input: ${e.message}")
         }
     }
 }
