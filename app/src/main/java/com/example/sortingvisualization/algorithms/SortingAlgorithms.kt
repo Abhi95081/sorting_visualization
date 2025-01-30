@@ -3,21 +3,91 @@ package com.example.sortingvisualization.algorithms
 import kotlinx.coroutines.delay
 
 class SortingAlgorithms {
+    // Sorting Algorithm Sequence Representation
+    enum class SortingStep {
+        INITIALIZATION,
+        COMPARISON,
+        SWAP,
+        ITERATION,
+        COMPLETION
+    }
+
+    // Sorting Algorithm Box Representation
+    data class AlgorithmBox(
+        val algorithmName: String,
+        val currentStep: SortingStep,
+        val stepDescription: String,
+        val iterationCount: Int,
+        val comparisonCount: Int,
+        val swapCount: Int
+    )
+
     // Bubble Sort: Repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order
     suspend fun bubbleSort(
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long = 50
     ) {
         val n = arr.size
+        var iterationCount = 0
+        var comparisonCount = 0
+        var swapCount = 0
+
+        // Initialization Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Bubble Sort",
+            currentStep = SortingStep.INITIALIZATION,
+            stepDescription = "Starting Bubble Sort with array of size $n",
+            iterationCount = iterationCount,
+            comparisonCount = comparisonCount,
+            swapCount = swapCount
+        ))
+        delay(delay)
+
         for (i in 0 until n - 1) {
+            iterationCount++
+            
+            // Iteration Start Step
+            onStepUpdate(AlgorithmBox(
+                algorithmName = "Bubble Sort",
+                currentStep = SortingStep.ITERATION,
+                stepDescription = "Iteration ${i + 1} of ${n - 1}",
+                iterationCount = iterationCount,
+                comparisonCount = comparisonCount,
+                swapCount = swapCount
+            ))
+            delay(delay)
+
             for (j in 0 until n - i - 1) {
+                comparisonCount++
+                
+                // Comparison Step
+                onStepUpdate(AlgorithmBox(
+                    algorithmName = "Bubble Sort",
+                    currentStep = SortingStep.COMPARISON,
+                    stepDescription = "Comparing elements at indices $j and ${j + 1}",
+                    iterationCount = iterationCount,
+                    comparisonCount = comparisonCount,
+                    swapCount = swapCount
+                ))
                 onCompare(j, j + 1)
                 delay(delay)
                 
                 if (arr[j] > arr[j + 1]) {
-                    // Swap elements
+                    swapCount++
+                    
+                    // Swap Step
+                    onStepUpdate(AlgorithmBox(
+                        algorithmName = "Bubble Sort",
+                        currentStep = SortingStep.SWAP,
+                        stepDescription = "Swapping elements at indices $j and ${j + 1}",
+                        iterationCount = iterationCount,
+                        comparisonCount = comparisonCount,
+                        swapCount = swapCount
+                    ))
+                    
                     val temp = arr[j]
                     arr[j] = arr[j + 1]
                     arr[j + 1] = temp
@@ -27,6 +97,17 @@ class SortingAlgorithms {
                 }
             }
         }
+
+        // Completion Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Bubble Sort",
+            currentStep = SortingStep.COMPLETION,
+            stepDescription = "Sorting complete",
+            iterationCount = iterationCount,
+            comparisonCount = comparisonCount,
+            swapCount = swapCount
+        ))
+        delay(delay)
     }
 
     // Selection Sort: Divides input list into two parts - sorted and unsorted
@@ -34,12 +115,52 @@ class SortingAlgorithms {
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long = 50
     ) {
         val n = arr.size
+        var iterationCount = 0
+        var comparisonCount = 0
+        var swapCount = 0
+
+        // Initialization Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Selection Sort",
+            currentStep = SortingStep.INITIALIZATION,
+            stepDescription = "Starting Selection Sort with array of size $n",
+            iterationCount = iterationCount,
+            comparisonCount = comparisonCount,
+            swapCount = swapCount
+        ))
+        delay(delay)
+
         for (i in 0 until n - 1) {
+            iterationCount++
+            
+            // Iteration Start Step
+            onStepUpdate(AlgorithmBox(
+                algorithmName = "Selection Sort",
+                currentStep = SortingStep.ITERATION,
+                stepDescription = "Iteration ${i + 1} of ${n - 1}",
+                iterationCount = iterationCount,
+                comparisonCount = comparisonCount,
+                swapCount = swapCount
+            ))
+            delay(delay)
+
             var minIndex = i
             for (j in i + 1 until n) {
+                comparisonCount++
+                
+                // Comparison Step
+                onStepUpdate(AlgorithmBox(
+                    algorithmName = "Selection Sort",
+                    currentStep = SortingStep.COMPARISON,
+                    stepDescription = "Comparing elements at indices $minIndex and $j",
+                    iterationCount = iterationCount,
+                    comparisonCount = comparisonCount,
+                    swapCount = swapCount
+                ))
                 onCompare(minIndex, j)
                 delay(delay)
                 
@@ -49,7 +170,18 @@ class SortingAlgorithms {
             }
             
             if (minIndex != i) {
-                // Swap elements
+                swapCount++
+                
+                // Swap Step
+                onStepUpdate(AlgorithmBox(
+                    algorithmName = "Selection Sort",
+                    currentStep = SortingStep.SWAP,
+                    stepDescription = "Swapping elements at indices $i and $minIndex",
+                    iterationCount = iterationCount,
+                    comparisonCount = comparisonCount,
+                    swapCount = swapCount
+                ))
+                
                 val temp = arr[i]
                 arr[i] = arr[minIndex]
                 arr[minIndex] = temp
@@ -58,6 +190,17 @@ class SortingAlgorithms {
                 delay(delay)
             }
         }
+
+        // Completion Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Selection Sort",
+            currentStep = SortingStep.COMPLETION,
+            stepDescription = "Sorting complete",
+            iterationCount = iterationCount,
+            comparisonCount = comparisonCount,
+            swapCount = swapCount
+        ))
+        delay(delay)
     }
 
     // Insertion Sort: Builds the final sorted array one item at a time
@@ -65,18 +208,70 @@ class SortingAlgorithms {
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long = 50
     ) {
         val n = arr.size
+        var iterationCount = 0
+        var comparisonCount = 0
+        var swapCount = 0
+
+        // Initialization Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Insertion Sort",
+            currentStep = SortingStep.INITIALIZATION,
+            stepDescription = "Starting Insertion Sort with array of size $n",
+            iterationCount = iterationCount,
+            comparisonCount = comparisonCount,
+            swapCount = swapCount
+        ))
+        delay(delay)
+
         for (i in 1 until n) {
+            iterationCount++
+            
+            // Iteration Start Step
+            onStepUpdate(AlgorithmBox(
+                algorithmName = "Insertion Sort",
+                currentStep = SortingStep.ITERATION,
+                stepDescription = "Iteration ${i} of ${n - 1}",
+                iterationCount = iterationCount,
+                comparisonCount = comparisonCount,
+                swapCount = swapCount
+            ))
+            delay(delay)
+
             val key = arr[i]
             var j = i - 1
             
             while (j >= 0) {
+                comparisonCount++
+                
+                // Comparison Step
+                onStepUpdate(AlgorithmBox(
+                    algorithmName = "Insertion Sort",
+                    currentStep = SortingStep.COMPARISON,
+                    stepDescription = "Comparing elements at indices $j and ${j + 1}",
+                    iterationCount = iterationCount,
+                    comparisonCount = comparisonCount,
+                    swapCount = swapCount
+                ))
                 onCompare(j, j + 1)
                 delay(delay)
                 
                 if (arr[j] > key) {
+                    swapCount++
+                    
+                    // Swap Step
+                    onStepUpdate(AlgorithmBox(
+                        algorithmName = "Insertion Sort",
+                        currentStep = SortingStep.SWAP,
+                        stepDescription = "Shifting element at index $j to the right",
+                        iterationCount = iterationCount,
+                        comparisonCount = comparisonCount,
+                        swapCount = swapCount
+                    ))
+                    
                     arr[j + 1] = arr[j]
                     onSwap(j, j + 1)
                     delay(delay)
@@ -87,6 +282,17 @@ class SortingAlgorithms {
             }
             arr[j + 1] = key
         }
+
+        // Completion Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Insertion Sort",
+            currentStep = SortingStep.COMPLETION,
+            stepDescription = "Sorting complete",
+            iterationCount = iterationCount,
+            comparisonCount = comparisonCount,
+            swapCount = swapCount
+        ))
+        delay(delay)
     }
 
     // Merge Sort: Divides the array into two halves, recursively sorts them, and then merges
@@ -94,9 +300,10 @@ class SortingAlgorithms {
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long = 50
     ) {
-        mergeSortHelper(arr, 0, arr.size - 1, onCompare, onSwap, delay)
+        mergeSortHelper(arr, 0, arr.size - 1, onCompare, onSwap, onStepUpdate, delay)
     }
 
     private suspend fun mergeSortHelper(
@@ -105,15 +312,27 @@ class SortingAlgorithms {
         right: Int,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long
     ) {
         if (left < right) {
             val mid = left + (right - left) / 2
             
-            mergeSortHelper(arr, left, mid, onCompare, onSwap, delay)
-            mergeSortHelper(arr, mid + 1, right, onCompare, onSwap, delay)
+            // Split Step
+            onStepUpdate(AlgorithmBox(
+                algorithmName = "Merge Sort",
+                currentStep = SortingStep.ITERATION,
+                stepDescription = "Splitting array into two halves at index $mid",
+                iterationCount = 0,
+                comparisonCount = 0,
+                swapCount = 0
+            ))
+            delay(delay)
+
+            mergeSortHelper(arr, left, mid, onCompare, onSwap, onStepUpdate, delay)
+            mergeSortHelper(arr, mid + 1, right, onCompare, onSwap, onStepUpdate, delay)
             
-            merge(arr, left, mid, right, onCompare, onSwap, delay)
+            merge(arr, left, mid, right, onCompare, onSwap, onStepUpdate, delay)
         }
     }
 
@@ -124,6 +343,7 @@ class SortingAlgorithms {
         right: Int,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long
     ) {
         val leftArr = arr.subList(left, mid + 1).toMutableList()
@@ -133,6 +353,17 @@ class SortingAlgorithms {
         var j = 0
         var k = left
         
+        // Merge Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Merge Sort",
+            currentStep = SortingStep.ITERATION,
+            stepDescription = "Merging two halves of the array",
+            iterationCount = 0,
+            comparisonCount = 0,
+            swapCount = 0
+        ))
+        delay(delay)
+
         while (i < leftArr.size && j < rightArr.size) {
             onCompare(left + i, mid + 1 + j)
             delay(delay)
@@ -173,9 +404,10 @@ class SortingAlgorithms {
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long = 50
     ) {
-        quickSortHelper(arr, 0, arr.size - 1, onCompare, onSwap, delay)
+        quickSortHelper(arr, 0, arr.size - 1, onCompare, onSwap, onStepUpdate, delay)
     }
 
     private suspend fun quickSortHelper(
@@ -184,12 +416,13 @@ class SortingAlgorithms {
         high: Int,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long
     ) {
         if (low < high) {
-            val pivotIndex = partition(arr, low, high, onCompare, onSwap, delay)
-            quickSortHelper(arr, low, pivotIndex - 1, onCompare, onSwap, delay)
-            quickSortHelper(arr, pivotIndex + 1, high, onCompare, onSwap, delay)
+            val pivotIndex = partition(arr, low, high, onCompare, onSwap, onStepUpdate, delay)
+            quickSortHelper(arr, low, pivotIndex - 1, onCompare, onSwap, onStepUpdate, delay)
+            quickSortHelper(arr, pivotIndex + 1, high, onCompare, onSwap, onStepUpdate, delay)
         }
     }
 
@@ -199,11 +432,23 @@ class SortingAlgorithms {
         high: Int,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long
     ): Int {
         val pivot = arr[high]
         var i = low - 1
         
+        // Partition Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Quick Sort",
+            currentStep = SortingStep.ITERATION,
+            stepDescription = "Partitioning array around pivot $pivot",
+            iterationCount = 0,
+            comparisonCount = 0,
+            swapCount = 0
+        ))
+        delay(delay)
+
         for (j in low until high) {
             onCompare(j, high)
             delay(delay)
@@ -237,13 +482,14 @@ class SortingAlgorithms {
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long = 50
     ) {
         val n = arr.size
         
         // Build max heap
         for (i in n / 2 - 1 downTo 0) {
-            heapify(arr, n, i, onCompare, onSwap, delay)
+            heapify(arr, n, i, onCompare, onSwap, onStepUpdate, delay)
         }
         
         // Extract elements from heap one by one
@@ -257,7 +503,7 @@ class SortingAlgorithms {
             delay(delay)
             
             // Call max heapify on the reduced heap
-            heapify(arr, i, 0, onCompare, onSwap, delay)
+            heapify(arr, i, 0, onCompare, onSwap, onStepUpdate, delay)
         }
     }
 
@@ -267,12 +513,24 @@ class SortingAlgorithms {
         i: Int,
         onCompare: (Int, Int) -> Unit,
         onSwap: (Int, Int) -> Unit,
+        onStepUpdate: (AlgorithmBox) -> Unit,
         delay: Long
     ) {
         var largest = i
         val left = 2 * i + 1
         val right = 2 * i + 2
         
+        // Heapify Step
+        onStepUpdate(AlgorithmBox(
+            algorithmName = "Heap Sort",
+            currentStep = SortingStep.ITERATION,
+            stepDescription = "Heapifying subtree rooted at index $i",
+            iterationCount = 0,
+            comparisonCount = 0,
+            swapCount = 0
+        ))
+        delay(delay)
+
         // Check if left child is larger than root
         if (left < n) {
             onCompare(largest, left)
@@ -304,7 +562,7 @@ class SortingAlgorithms {
             delay(delay)
             
             // Recursively heapify the affected sub-tree
-            heapify(arr, n, largest, onCompare, onSwap, delay)
+            heapify(arr, n, largest, onCompare, onSwap, onStepUpdate, delay)
         }
     }
 }

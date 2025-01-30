@@ -64,6 +64,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.sortingvisualization.algorithms.getCodeSnippet
 import com.example.sortingvisualization.algorithms.CodeSnippets
 import com.example.sortingvisualization.algorithms.ProgrammingLanguage
 import com.example.sortingvisualization.algorithms.SortingAlgorithm
@@ -140,14 +141,12 @@ fun SortingVisualizer(
             // Additional sorting algorithms
             SortingAlgorithm.PIGEONHOLE_SORT ->
                 "Time: O(n + k), Space: O(k)\nStable: Yes, In-place: No\nRequires known range"
-            SortingAlgorithm.TIM_SORT ->
-                "Time: O(n log n), Space: O(n)\nStable: Yes, In-place: No\nHybrid of Insertion and Merge Sort"
+
             SortingAlgorithm.GNOME_SORT ->
                 "Time: O(n²), Space: O(1)\nStable: Yes, In-place: Yes"
             SortingAlgorithm.CYCLE_SORT ->
                 "Time: O(n²), Space: O(1)\nStable: No, In-place: Yes\nMinimizes writes"
-            SortingAlgorithm.PANCAKE_SORT ->
-                "Time: O(n), Space: O(1)\nStable: No, In-place: Yes\nUnique sorting technique"
+
         }
     }
 
@@ -186,7 +185,7 @@ fun SortingVisualizer(
     @Composable
     fun CodeSnippetDisplay() {
         val context = LocalContext.current
-        val codeSnippet = CodeSnippets.getCodeSnippet(
+        val codeSnippet = getCodeSnippet(
             viewModel.selectedAlgorithm, 
             selectedLanguageState.value
         )
@@ -207,7 +206,7 @@ fun SortingVisualizer(
                     .verticalScroll(rememberScrollState())
                     .padding(4.dp)
             ) {
-                Text(
+                androidx.compose.material3.Text(
                     text = codeSnippet,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 10.sp,
@@ -580,12 +579,17 @@ fun SortingVisualizer(
                                 "Advanced Comparison Sorting" to listOf(
                                     SortingAlgorithm.SHELL_SORT,
                                     SortingAlgorithm.COCKTAIL_SHAKER_SORT,
-                                    SortingAlgorithm.COMB_SORT
+                                    SortingAlgorithm.COMB_SORT,
+                                    SortingAlgorithm.GNOME_SORT
                                 ),
                                 "Non-Comparison Sorting" to listOf(
                                     SortingAlgorithm.COUNTING_SORT,
                                     SortingAlgorithm.RADIX_SORT,
-                                    SortingAlgorithm.BUCKET_SORT
+                                    SortingAlgorithm.BUCKET_SORT,
+                                    SortingAlgorithm.PIGEONHOLE_SORT
+                                ),
+                                "Specialized Sorting" to listOf(
+                                    SortingAlgorithm.CYCLE_SORT,
                                 )
                             )
 

@@ -16,6 +16,17 @@ import kotlin.math.pow
 
 class SortingViewModel : ViewModel() {
 
+
+    var showSplash = mutableStateOf(true)
+        private set
+
+    init {
+        viewModelScope.launch {
+            delay(2000) // 2 seconds delay
+            showSplash.value = false
+        }
+    }
+
     private companion object {
         const val MIN_ARRAY_SIZE = 10
         const val MAX_ARRAY_SIZE = 100
@@ -156,10 +167,9 @@ class SortingViewModel : ViewModel() {
                     
                     // Additional sorting algorithms
                     SortingAlgorithm.PIGEONHOLE_SORT -> pigeonholeSort()
-                    SortingAlgorithm.TIM_SORT -> timSort()
                     SortingAlgorithm.GNOME_SORT -> gnomeSort()
                     SortingAlgorithm.CYCLE_SORT -> cycleSort()
-                    SortingAlgorithm.PANCAKE_SORT -> pancakeSort()
+
                 }
             } catch (e: Exception) {
                 // Log the error or handle it appropriately
@@ -1007,4 +1017,24 @@ class SortingViewModel : ViewModel() {
             println("Invalid input: ${e.message}")
         }
     }
+}
+
+enum class SortingAlgorithm {
+    BUBBLE_SORT,
+    SELECTION_SORT,
+    INSERTION_SORT,
+    MERGE_SORT,
+    QUICK_SORT,
+    HEAP_SORT,
+    SHELL_SORT,
+    COCKTAIL_SHAKER_SORT,
+    COMB_SORT,
+    COUNTING_SORT,
+    RADIX_SORT,
+    BUCKET_SORT,
+    PIGEONHOLE_SORT,
+    TIM_SORT,
+    GNOME_SORT,
+    CYCLE_SORT,
+    PANCAKE_SORT
 }

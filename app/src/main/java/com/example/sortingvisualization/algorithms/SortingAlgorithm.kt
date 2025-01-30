@@ -21,8 +21,6 @@ enum class SortingAlgorithm(val displayName: String) {
 
     // Additional sorting algorithms
     PIGEONHOLE_SORT("Pigeonhole Sort"),
-    TIM_SORT("Tim Sort"),
     GNOME_SORT("Gnome Sort"),
-    CYCLE_SORT("Cycle Sort"),
-    PANCAKE_SORT("Pancake Sort")
+    CYCLE_SORT("Cycle Sort")
 }
