@@ -9,7 +9,8 @@ A sorting algorithm visualization tool built using Jetpack Compose and Windsurf 
 - Adjustable speed and algorithm selection
 
 ## Screenshots
-![Visualization Screenshot](image.png)  
+![image](https://github.com/user-attachments/assets/d03b5dfb-8577-4965-990c-00c6b0831b47)
+
 
 ## Installation
 1. Clone the repository:
