@@ -1,10 +1,9 @@
 # Sorting Visualization
 
-A sorting algorithm visualization tool built using Jetpack Compose and Windsurf AI.
+A sorting algorithm visualization tool built using Jetpack Compose.
 
 ## Features
 - Real-time visualization of various sorting algorithms
-- AI-powered enhancements using Windsurf AI
 - Modern UI with Jetpack Compose
 - Adjustable speed and algorithm selection
 
@@ -22,7 +21,6 @@ A sorting algorithm visualization tool built using Jetpack Compose and Windsurf 
 
 ## Dependencies
 - Jetpack Compose
-- Windsurf AI SDK
 - Kotlin
 
 ## How to Use
@@ -37,5 +35,5 @@ Pull requests are welcome! If you find a bug or have a feature request, feel fre
 This project is licensed under the MIT License.
 
 ## Contact
-For any queries, reach out at [your email or social handle].
+For any queries, reach out at [abhirou7@gmail.com].
 
