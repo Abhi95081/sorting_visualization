@@ -51,7 +51,7 @@ fun SplashScreen(onSplashEnd: () -> Unit) {
             animationState.animate(
                 composition = composition,
                 iterations = 1,
-                speed = 1.0f
+                speed = 3.5f
             )
 
             // Wait a short moment after animation ends to ensure user sees full animation
