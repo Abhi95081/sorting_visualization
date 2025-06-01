@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sortingvisualization.algorithms.SortingAlgorithm
@@ -36,7 +38,7 @@ class SortingViewModel : ViewModel() {
     }
 
     // State properties
-    private val _arraySize = mutableStateOf(50)
+    private val _arraySize = mutableIntStateOf(50)
     val arraySize: Int by _arraySize
 
     private val _array = mutableStateListOf<Double>()
@@ -46,11 +48,11 @@ class SortingViewModel : ViewModel() {
     val isSorting: Boolean by _isSorting
 
     // Improved speed control with exponential scaling
-    private val _sortingSpeed = mutableStateOf(DEFAULT_SPEED)
+    private val _sortingSpeed = mutableLongStateOf(DEFAULT_SPEED)
     var sortingSpeed: Long by _sortingSpeed
 
     // New property to control visualization granularity
-    private val _visualizationGranularity = mutableStateOf(1)
+    private val _visualizationGranularity = mutableIntStateOf(1)
     val visualizationGranularity: Int by _visualizationGranularity
 
     private val _currentCompareIndices = mutableStateOf(Pair(-1, -1))
@@ -78,7 +80,7 @@ class SortingViewModel : ViewModel() {
     fun generateRandomArray() {
         cancelSorting()
         _array.clear()
-        _array.addAll(createRandomArray(_arraySize.value))
+        _array.addAll(createRandomArray(_arraySize.intValue))
     }
 
     // Method to show array size dialog
@@ -99,7 +101,7 @@ class SortingViewModel : ViewModel() {
         val constrainedSize = newSize.coerceIn(10, 100)
         
         // Update array size
-        _arraySize.value = constrainedSize
+        _arraySize.intValue = constrainedSize
         
         // Regenerate array with new size
         generateRandomArray()
@@ -111,12 +113,12 @@ class SortingViewModel : ViewModel() {
     // Update sorting speed with exponential scaling
     fun updateSortingSpeed(newSpeed: Long) {
         // Exponential scaling: lower values mean faster sorting
-        _sortingSpeed.value = newSpeed.coerceIn(MIN_SPEED, MAX_SPEED)
+        _sortingSpeed.longValue = newSpeed.coerceIn(MIN_SPEED, MAX_SPEED)
     }
 
     // New method to control visualization granularity
     fun updateVisualizationGranularity(newGranularity: Int) {
-        _visualizationGranularity.value = newGranularity.coerceIn(1, 10)
+        _visualizationGranularity.intValue = newGranularity.coerceIn(1, 10)
     }
 
     // Clear sorting steps before starting a new sort
@@ -292,7 +294,7 @@ class SortingViewModel : ViewModel() {
             val key = arr[i]
             var j = i - 1
 
-            addSortingStep("Pass ${i}: Inserting ${key} into sorted portion")
+            addSortingStep("Pass ${i}: Inserting $key into sorted portion")
 
             while (j >= 0 && arr[j] > key) {
                 _currentCompareIndices.value = Pair(j, j + 1)
@@ -304,7 +306,7 @@ class SortingViewModel : ViewModel() {
             }
 
             arr[j + 1] = key
-            addSortingStep("Inserted ${key} at index ${j + 1}")
+            addSortingStep("Inserted $key at index ${j + 1}")
         }
 
         addSortingStep("✅ Insertion Sort completed")
@@ -610,7 +612,7 @@ class SortingViewModel : ViewModel() {
                     j -= gap
                 }
                 
-                addSortingStep("Inserting ${temp} at index $j")
+                addSortingStep("Inserting $temp at index $j")
                 arr[j] = temp
             }
             gap /= 2
@@ -817,36 +819,6 @@ class SortingViewModel : ViewModel() {
         addSortingStep("✅ Pigeonhole Sort completed")
     }
 
-    // Tim Sort
-    private suspend fun timSort() {
-        val arr = _array
-        if (arr.isEmpty()) return
-        
-        // Find range of input
-        val min = arr.minOrNull()!!
-        val max = arr.maxOrNull()!!
-        val range = max - min + 1
-        
-        // Create run array
-        val run = MutableList(arr.size) { 0 }
-        
-        // Distribute input array elements into runs
-        for (i in arr.indices) {
-            run[i] = (arr[i] - min).toInt()
-        }
-        
-        // Sort individual runs
-        for (i in 0 until arr.size) {
-            var j = i
-            while (j + 1 < arr.size && run[j] <= run[j + 1]) {
-                j++
-            }
-            insertionSort(arr, i, j)
-        }
-        
-        addSortingStep("✅ Tim Sort completed")
-    }
-
     private suspend fun insertionSort(arr: MutableList<Double>, start: Int, end: Int) {
         for (i in start + 1..end) {
             val key = arr[i]
@@ -1019,22 +991,3 @@ class SortingViewModel : ViewModel() {
     }
 }
 
-enum class SortingAlgorithm {
-    BUBBLE_SORT,
-    SELECTION_SORT,
-    INSERTION_SORT,
-    MERGE_SORT,
-    QUICK_SORT,
-    HEAP_SORT,
-    SHELL_SORT,
-    COCKTAIL_SHAKER_SORT,
-    COMB_SORT,
-    COUNTING_SORT,
-    RADIX_SORT,
-    BUCKET_SORT,
-    PIGEONHOLE_SORT,
-    TIM_SORT,
-    GNOME_SORT,
-    CYCLE_SORT,
-    PANCAKE_SORT
-}

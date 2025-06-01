@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -56,7 +56,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -64,10 +63,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sortingvisualization.algorithms.getCodeSnippet
-import com.example.sortingvisualization.algorithms.CodeSnippets
 import com.example.sortingvisualization.algorithms.ProgrammingLanguage
 import com.example.sortingvisualization.algorithms.SortingAlgorithm
+import com.example.sortingvisualization.algorithms.getCodeSnippet
 import com.example.sortingvisualization.viewmodel.SortingViewModel
 import kotlin.math.max
 import kotlin.math.min
@@ -206,7 +204,7 @@ fun SortingVisualizer(
                     .verticalScroll(rememberScrollState())
                     .padding(4.dp)
             ) {
-                androidx.compose.material3.Text(
+                Text(
                     text = codeSnippet,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 10.sp,
@@ -228,61 +226,6 @@ fun SortingVisualizer(
                     .padding(top = 4.dp)
             ) {
                 Text("Copy Code", fontSize = 12.sp)
-            }
-        }
-    }
-
-    @Composable
-    fun SortingStepsDisplay() {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(2.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-            ) {
-                Text(
-                    text = "Sorting Steps",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-
-                // Indices Display
-                Text(
-                    text = "Indices: ${
-                        if (viewModel.currentCompareIndices.first != -1) 
-                            "${viewModel.currentCompareIndices.first},${viewModel.currentCompareIndices.second}" 
-                        else 
-                            "-"
-                    }",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 10.sp
-                    ),
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-
-                // Sorting Steps List
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 50.dp, max = 150.dp),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    items(viewModel.sortingSteps) { step ->
-                        Text(
-                            text = step,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 9.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
             }
         }
     }
@@ -676,7 +619,7 @@ fun SortingVisualizer(
                             expanded = languageExpanded,
                             onDismissRequest = { languageExpanded = false }
                         ) {
-                            ProgrammingLanguage.values().forEach { language ->
+                            ProgrammingLanguage.entries.forEach { language ->
                                 DropdownMenuItem(
                                     text = { Text(language.name) },
                                     onClick = {
