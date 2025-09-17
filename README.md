@@ -16,7 +16,7 @@ https://drive.google.com/file/d/1N-9Uink6VpZt6VZbMhjC81Xh6LZdEFOy/view?usp=drive
 ## Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/sorting-visualization.git
+   git clone https://github.com/Abhi95081/sorting-visualization.git
    ```
 2. Open the project in Android Studio.
 3. Build and run the application.
