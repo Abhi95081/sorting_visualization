@@ -1,4 +1,4 @@
-package com.example.sortingvisualization.ui
+package com.example.sortingvisualization
 
 import android.content.ClipData
 import android.content.ClipboardManager
