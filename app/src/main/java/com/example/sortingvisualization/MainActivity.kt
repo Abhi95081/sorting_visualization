@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.*
-import com.example.sortingvisualization.ui.SortingVisualizer
 import com.example.sortingvisualization.ui.theme.SortingVisualizationTheme
 import com.example.sortingvisualization.viewmodel.SortingViewModel
 import kotlinx.coroutines.delay
