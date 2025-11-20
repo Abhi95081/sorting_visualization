@@ -47,17 +47,14 @@ fun SplashScreen(onSplashEnd: () -> Unit) {
                 alpha.animateTo(1f, animationSpec = tween(2500))
             }
 
-            // Play the Lottie animation once fully
             animationState.animate(
                 composition = composition,
                 iterations = 1,
                 speed = 3.5f
             )
 
-            // Wait a short moment after animation ends to ensure user sees full animation
             delay(500)
 
-            // Call onSplashEnd to move on
             onSplashEnd()
         }
     }
