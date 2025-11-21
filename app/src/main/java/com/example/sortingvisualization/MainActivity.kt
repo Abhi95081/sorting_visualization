@@ -42,7 +42,7 @@ fun SplashScreen(onSplashEnd: () -> Unit) {
 
     LaunchedEffect(composition) {
         if (composition != null) {
-            // Fade in texts slowly
+
             launch {
                 alpha.animateTo(1f, animationSpec = tween(2500))
             }
