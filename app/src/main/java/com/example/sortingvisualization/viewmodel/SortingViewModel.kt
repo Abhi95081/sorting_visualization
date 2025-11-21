@@ -30,8 +30,6 @@ class SortingViewModel : ViewModel() {
     }
 
     private companion object {
-        const val MIN_ARRAY_SIZE = 10
-        const val MAX_ARRAY_SIZE = 100
         const val MIN_SPEED = 1L
         const val MAX_SPEED = 500L
         const val DEFAULT_SPEED = 50L
@@ -45,7 +43,6 @@ class SortingViewModel : ViewModel() {
     val array: List<Double> = _array
 
     private val _isSorting = mutableStateOf(false)
-    val isSorting: Boolean by _isSorting
 
     // Improved speed control with exponential scaling
     private val _sortingSpeed = mutableLongStateOf(DEFAULT_SPEED)
