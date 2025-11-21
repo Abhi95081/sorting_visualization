@@ -24,7 +24,7 @@ class SortingViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            delay(2000) // 2 seconds delay
+            delay(2000)
             showSplash.value = false
         }
     }
