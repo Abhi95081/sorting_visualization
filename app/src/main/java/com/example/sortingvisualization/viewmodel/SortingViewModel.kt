@@ -35,7 +35,7 @@ class SortingViewModel : ViewModel() {
         const val DEFAULT_SPEED = 50L
     }
 
-    // State properties
+
     private val _arraySize = mutableIntStateOf(50)
     val arraySize: Int by _arraySize
 
@@ -44,11 +44,11 @@ class SortingViewModel : ViewModel() {
 
     private val _isSorting = mutableStateOf(false)
 
-    // Improved speed control with exponential scaling
+
     private val _sortingSpeed = mutableLongStateOf(DEFAULT_SPEED)
     var sortingSpeed: Long by _sortingSpeed
 
-    // New property to control visualization granularity
+
     private val _visualizationGranularity = mutableIntStateOf(1)
     val visualizationGranularity: Int by _visualizationGranularity
 
@@ -73,7 +73,7 @@ class SortingViewModel : ViewModel() {
         return List(size) { (1..size).random().toDouble() }
     }
 
-    // Generate a new random array
+
     fun generateRandomArray() {
         cancelSorting()
         _array.clear()
