@@ -3,7 +3,7 @@ package com.example.sortingvisualization.algorithms
 import kotlinx.coroutines.delay
 
 class SortingAlgorithms {
-    // Sorting Algorithm Sequence Representation
+
     enum class SortingStep {
         INITIALIZATION,
         COMPARISON,
@@ -12,7 +12,7 @@ class SortingAlgorithms {
         COMPLETION
     }
 
-    // Sorting Algorithm Box Representation
+
     data class AlgorithmBox(
         val algorithmName: String,
         val currentStep: SortingStep,
@@ -22,7 +22,7 @@ class SortingAlgorithms {
         val swapCount: Int
     )
 
-    // Bubble Sort: Repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order
+
     suspend fun bubbleSort(
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
@@ -35,7 +35,7 @@ class SortingAlgorithms {
         var comparisonCount = 0
         var swapCount = 0
 
-        // Initialization Step
+
         onStepUpdate(AlgorithmBox(
             algorithmName = "Bubble Sort",
             currentStep = SortingStep.INITIALIZATION,
@@ -49,7 +49,7 @@ class SortingAlgorithms {
         for (i in 0 until n - 1) {
             iterationCount++
             
-            // Iteration Start Step
+
             onStepUpdate(AlgorithmBox(
                 algorithmName = "Bubble Sort",
                 currentStep = SortingStep.ITERATION,
@@ -63,7 +63,7 @@ class SortingAlgorithms {
             for (j in 0 until n - i - 1) {
                 comparisonCount++
                 
-                // Comparison Step
+
                 onStepUpdate(AlgorithmBox(
                     algorithmName = "Bubble Sort",
                     currentStep = SortingStep.COMPARISON,
@@ -78,7 +78,7 @@ class SortingAlgorithms {
                 if (arr[j] > arr[j + 1]) {
                     swapCount++
                     
-                    // Swap Step
+
                     onStepUpdate(AlgorithmBox(
                         algorithmName = "Bubble Sort",
                         currentStep = SortingStep.SWAP,
