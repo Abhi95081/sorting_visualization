@@ -420,7 +420,6 @@ object CodeSnippets {
                     while (swapped) {
                         swapped = false;
                         
-                        // Forward pass
                         for (int i = start; i < end; i++) {
                             if (arr[i] > arr[i + 1]) {
                                 swap(arr[i], arr[i + 1]);
