@@ -77,7 +77,7 @@ fun SortingVisualizer(
     viewModel: SortingViewModel,
     isLandscape: Boolean = false
 ) {
-    // Use isLandscape to conditionally adjust layout or UI elements
+
     val screenLayout = if (isLandscape) {
         Modifier.fillMaxSize()
             .then(Modifier.padding(horizontal = 16.dp))
@@ -85,25 +85,25 @@ fun SortingVisualizer(
         Modifier.fillMaxSize()
     }
 
-    // Language selection state with preservation across orientation
+
     val selectedLanguageState = rememberSaveable { 
         mutableStateOf(ProgrammingLanguage.CPP)
     }
     
-    // Algorithm expanded state
+
     var algorithmExpanded by remember { 
         mutableStateOf(false) 
     }
     
-    // Language expanded state
+
     var languageExpanded by remember { 
         mutableStateOf(false) 
     }
 
-    // State for manual array input
+
     var manualInputText by remember { mutableStateOf("") }
 
-    // Complexity information for current algorithm
+
     val algorithmComplexity = remember(viewModel.selectedAlgorithm) {
         when (viewModel.selectedAlgorithm) {
             // Basic comparison-based sorting
