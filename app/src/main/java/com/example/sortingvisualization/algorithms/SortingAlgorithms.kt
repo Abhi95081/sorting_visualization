@@ -110,7 +110,7 @@ class SortingAlgorithms {
         delay(delay)
     }
 
-    // Selection Sort: Divides input list into two parts - sorted and unsorted
+
     suspend fun selectionSort(
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
