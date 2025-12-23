@@ -191,7 +191,7 @@ class SortingAlgorithms {
             }
         }
 
-        // Completion Step
+
         onStepUpdate(AlgorithmBox(
             algorithmName = "Selection Sort",
             currentStep = SortingStep.COMPLETION,
