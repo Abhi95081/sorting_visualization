@@ -203,7 +203,7 @@ class SortingAlgorithms {
         delay(delay)
     }
 
-    // Insertion Sort: Builds the final sorted array one item at a time
+
     suspend fun insertionSort(
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
