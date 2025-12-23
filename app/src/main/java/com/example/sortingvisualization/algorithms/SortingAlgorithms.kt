@@ -152,7 +152,7 @@ class SortingAlgorithms {
             for (j in i + 1 until n) {
                 comparisonCount++
                 
-                // Comparison Step
+
                 onStepUpdate(AlgorithmBox(
                     algorithmName = "Selection Sort",
                     currentStep = SortingStep.COMPARISON,
@@ -172,7 +172,7 @@ class SortingAlgorithms {
             if (minIndex != i) {
                 swapCount++
                 
-                // Swap Step
+
                 onStepUpdate(AlgorithmBox(
                     algorithmName = "Selection Sort",
                     currentStep = SortingStep.SWAP,
