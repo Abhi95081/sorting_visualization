@@ -230,7 +230,7 @@ class SortingAlgorithms {
         for (i in 1 until n) {
             iterationCount++
             
-            // Iteration Start Step
+
             onStepUpdate(AlgorithmBox(
                 algorithmName = "Insertion Sort",
                 currentStep = SortingStep.ITERATION,
