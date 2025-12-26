@@ -262,7 +262,7 @@ class SortingAlgorithms {
                 if (arr[j] > key) {
                     swapCount++
                     
-                    // Swap Step
+
                     onStepUpdate(AlgorithmBox(
                         algorithmName = "Insertion Sort",
                         currentStep = SortingStep.SWAP,
@@ -283,7 +283,7 @@ class SortingAlgorithms {
             arr[j + 1] = key
         }
 
-        // Completion Step
+
         onStepUpdate(AlgorithmBox(
             algorithmName = "Insertion Sort",
             currentStep = SortingStep.COMPLETION,
