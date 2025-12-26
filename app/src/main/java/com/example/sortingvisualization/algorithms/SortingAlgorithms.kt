@@ -216,7 +216,7 @@ class SortingAlgorithms {
         var comparisonCount = 0
         var swapCount = 0
 
-        // Initialization Step
+
         onStepUpdate(AlgorithmBox(
             algorithmName = "Insertion Sort",
             currentStep = SortingStep.INITIALIZATION,
