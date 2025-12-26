@@ -295,7 +295,7 @@ class SortingAlgorithms {
         delay(delay)
     }
 
-    // Merge Sort: Divides the array into two halves, recursively sorts them, and then merges
+
     suspend fun mergeSort(
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
