@@ -318,7 +318,7 @@ class SortingAlgorithms {
         if (left < right) {
             val mid = left + (right - left) / 2
             
-            // Split Step
+
             onStepUpdate(AlgorithmBox(
                 algorithmName = "Merge Sort",
                 currentStep = SortingStep.ITERATION,
@@ -353,7 +353,7 @@ class SortingAlgorithms {
         var j = 0
         var k = left
         
-        // Merge Step
+
         onStepUpdate(AlgorithmBox(
             algorithmName = "Merge Sort",
             currentStep = SortingStep.ITERATION,
@@ -399,7 +399,7 @@ class SortingAlgorithms {
         }
     }
 
-    // Quick Sort: Uses divide and conquer strategy with a pivot
+
     suspend fun quickSort(
         arr: MutableList<Int>,
         onCompare: (Int, Int) -> Unit,
