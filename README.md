@@ -1,3 +1,4 @@
+
  # Sorting Visualization
 
 A sorting algorithm visualization tool built using Jetpack Compose.
